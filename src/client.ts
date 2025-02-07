@@ -1,13 +1,25 @@
-import { IClientConfig, ITonStakingContracts, IParametersReadContract } from 'type';
+import {
+    IClientConfig,
+    ITonStakingContracts,
+    IReadContractParameters,
+    IGetContractEventsParameters,
+    ITonStakingContractAddresses,
+    ISimulateContractParameters,
+    IGetStorageAtParameters } from 'type';
 import { getChain } from './configs/chains';
+import { getContractAddresses as getCAddress} from './configs/addresses';
 import {
     createWalletClient,
     custom,
     createPublicClient,
     http,
     Client,
+    PublicClient,
     Account,
-    Address } from 'viem';
+    Address,
+    GetCodeParameters,
+    GetStorageAtParameters,
+    GetContractEventsParameters } from 'viem';
 import { getTonStakingContracts } from './models/contracts';
 import { Logger } from 'winston';
 import { logger } from './configs/logger'
@@ -20,36 +32,42 @@ declare global {
     }
 }
 
-export function tonStakingPublicClient(config: IClientConfig) : Client {
+export function tonStakingPublicClient(inConfig: IClientConfig) : Client {
+    var rpc = inConfig.rpcUrl?inConfig.rpcUrl:undefined
 
     return createPublicClient({
-        chain: getChain(config.chainId),
-        transport: http()
+        chain: getChain(inConfig.chainId),
+        transport: http(rpc)
     })
+
 }
 
 export function tonStakingWalletClient(
     inConfig: IClientConfig,
     accountOrAddress: Account | Address | undefined = undefined) : Client {
 
+    var rpc = inConfig.rpcUrl?inConfig.rpcUrl:undefined
+    var http_ = (typeof window !== 'undefined' && window.ethereum !== undefined)?
+                custom(window.ethereum!):http(rpc)
+
     return createWalletClient({
         chain: getChain(inConfig.chainId),
         account:  accountOrAddress,
-        transport: custom(window.ethereum!)
+        transport: http_
     })
 }
 
 export class TonStakingClient  {
     inConfig: IClientConfig;
-    publicClient: Client | any;
+    publicClient: PublicClient | any;
     walletClient: Client | any;
     log: Logger
 
-    constructor(inConfig: IClientConfig) {
+    constructor(inConfig: IClientConfig, accountOrAddress: Account | Address | undefined = undefined) {
         this.inConfig = inConfig;
         this.log = logger(inConfig.logPath, ' TON Staking Client ', inConfig.logLevel !== undefined?inConfig.logLevel:'error')
         this.setPublicClient()
-        this.setWalletClient()
+        this.setWalletClient(accountOrAddress)
 
     }
 
@@ -78,13 +96,69 @@ export class TonStakingClient  {
         return contracts
     }
 
-    async readContract(parameters: IParametersReadContract) : Promise<any> {
+    getContractAddresses() : ITonStakingContractAddresses | undefined {
+        return getCAddress(this.inConfig.chainId)
+    }
 
+    async readContract(parameters: IReadContractParameters) : Promise<any> {
         if (this.publicClient !== undefined) {
             return await this.publicClient?.readContract({
                 address: parameters.contract.address,
                 abi: parameters.contract.abi,
                 functionName: parameters.functionName,
+                args: parameters.args
+              })
+        }
+    }
+
+    async getCode(parameters: GetCodeParameters) : Promise<any> {
+
+        if (this.publicClient !== undefined) {
+            return await this.publicClient?.getCode({
+                address:parameters.address
+            })
+        }
+    }
+
+    async getContractEvents(parameters: IGetContractEventsParameters) : Promise<any> {
+
+        if (this.publicClient !== undefined) {
+
+            return await this.publicClient?.getContractEvents({
+                address: parameters.contract.address,
+                abi: parameters.contract.abi,
+                eventName: parameters.eventName,
+                args: parameters.args?parameters.args:undefined,
+                fromBlock: parameters.fromBlock?parameters.fromBlock:undefined,
+                toBlock: parameters.toBlock?parameters.toBlock:undefined
+              })
+        }
+    }
+
+    async getStorageAt(parameters: IGetStorageAtParameters) : Promise<any> {
+
+        if (this.publicClient !== undefined) {
+
+            return await this.publicClient?.getStorageAt({
+                address: parameters.address,
+                slot: parameters.slot,
+                blockNumber: parameters.blockNumber?parameters.blockNumber:undefined,
+                blockTag: parameters.blockTag?parameters.blockTag:undefined
+              })
+        }
+    }
+
+    async simulateContract(parameters: ISimulateContractParameters) : Promise<any> {
+
+        if (this.publicClient !== undefined) {
+            return await this.publicClient?.simulateContract({
+                address: parameters.contract.address,
+                abi: parameters.contract.abi,
+                functionName: parameters.functionName,
+                args: parameters.args?parameters.args:undefined,
+                account: parameters.account?parameters.account:undefined,
+                chain: parameters.chain?parameters.chain:undefined,
+                dataSuffix: parameters.dataSuffix?parameters.dataSuffix:undefined
               })
         }
     }

@@ -1,9 +1,17 @@
-import { GetContractReturnType } from 'viem';
 import {
+    GetContractReturnType,
+    BlockTag,
+    GetContractEventsParameters,
     PublicClient,
     WalletClient,
     Address,
-    Abi
+    Abi,
+    ContractEventArgs,
+    ContractEventName,
+    BlockNumber,
+    Hex,
+    Account,
+    Chain
   } from 'viem';
 
 export interface TransformableInfo {
@@ -14,8 +22,9 @@ export interface TransformableInfo {
 
 export interface IClientConfig {
     chainId: number,
-    logLevel: string | undefined
-    logPath: string | undefined
+    rpcUrl?: string | undefined,
+    logLevel?: string | undefined
+    logPath?: string | undefined
 }
 
 export interface IClients {
@@ -58,7 +67,34 @@ export interface ITonStakingContractAbi {
     Candidate: Abi,
 }
 
-export interface IParametersReadContract {
+export interface IReadContractParameters {
     contract: GetContractReturnType,
-    functionName: string
+    functionName: string,
+    args: Array<any> | undefined
+}
+
+export interface IGetContractEventsParameters {
+    contract: GetContractReturnType,
+    args: ContractEventArgs | undefined,
+    eventName: ContractEventName<Abi> | string | undefined,
+    strict: boolean | undefined,
+    fromBlock: BlockNumber | BlockTag | string | undefined,
+    toBlock: BlockNumber | BlockTag | undefined,
+}
+
+export interface IGetStorageAtParameters {
+    address: Address,
+    slot: Hex,
+    blockNumber?: undefined
+    blockTag?: BlockTag | undefined
+}
+
+export interface ISimulateContractParameters {
+    contract: GetContractReturnType,
+    functionName: string,
+    args: Array<any> | undefined,
+    account?: Account | Address | null | undefined
+    chain?: Chain | undefined
+    /** Data to append to the end of the calldata. Useful for adding a ["domain" tag](https://opensea.notion.site/opensea/Seaport-Order-Attributions-ec2d69bf455041a5baa490941aad307f). */
+    dataSuffix?: Hex | undefined
 }
