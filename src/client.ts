@@ -4,7 +4,7 @@ import {
     IReadContractParameters,
     IGetContractEventsParameters,
     ITonStakingContractAddresses,
-    ISimulateContractParameters,
+    IWriteContractParameters,
     IGetStorageAtParameters } from 'type';
 import { getChain } from './configs/chains';
 import { getContractAddresses as getCAddress} from './configs/addresses';
@@ -15,6 +15,7 @@ import {
     http,
     Client,
     PublicClient,
+    WalletClient,
     Account,
     Address,
     GetCodeParameters,
@@ -60,14 +61,16 @@ export function tonStakingWalletClient(
 export class TonStakingClient  {
     inConfig: IClientConfig;
     publicClient: PublicClient | any;
-    walletClient: Client | any;
+    walletClient: WalletClient | any;
     log: Logger
+    account: Account | Address | undefined
 
     constructor(inConfig: IClientConfig, accountOrAddress: Account | Address | undefined = undefined) {
         this.inConfig = inConfig;
         this.log = logger(inConfig.logPath, ' TON Staking Client ', inConfig.logLevel !== undefined?inConfig.logLevel:'error')
         this.setPublicClient()
         this.setWalletClient(accountOrAddress)
+        this.account = accountOrAddress
 
     }
 
@@ -81,12 +84,17 @@ export class TonStakingClient  {
             if(typeof window !== 'undefined') {
                 account = await window.ethereum!.request({ method: 'eth_requestAccounts' })
                 this.log?.debug({account: account})
+
+                this.account = account
             }
         }
 
         if (account == undefined) {
             this.log?.debug("account is undefined")
         } else {
+            if(typeof account === 'string') this.log?.debug({account: account})
+            else if(typeof account === 'object') this.log?.debug({account: account.address})
+
             this.walletClient = tonStakingWalletClient(this.inConfig, account)
         }
     }
@@ -148,7 +156,7 @@ export class TonStakingClient  {
         }
     }
 
-    async simulateContract(parameters: ISimulateContractParameters) : Promise<any> {
+    async simulateContract(parameters: IWriteContractParameters) : Promise<any> {
 
         if (this.publicClient !== undefined) {
             return await this.publicClient?.simulateContract({
@@ -162,4 +170,62 @@ export class TonStakingClient  {
               })
         }
     }
+
+    async estimateContractGas(parameters: IWriteContractParameters) : Promise<any> {
+
+        if (this.walletClient !== undefined && this.account != undefined) {
+            return await this.publicClient?.estimateContractGas({
+                address: parameters.contract.address,
+                abi: parameters.contract.abi,
+                functionName: parameters.functionName,
+                args: parameters.args?parameters.args:undefined,
+                account: this.account
+            })
+        }
+    }
+
+    async writeContract(parameters: IWriteContractParameters) : Promise<any> {
+
+        if (this.walletClient !== undefined && this.account != undefined) {
+            const gas = await this.publicClient?.estimateContractGas({
+                address: parameters.contract.address,
+                abi: parameters.contract.abi,
+                functionName: parameters.functionName,
+                args: parameters.args?parameters.args:undefined,
+                account: this.account
+            })
+
+            this.log?.debug({estimateContractGas: gas})
+
+            if (gas !== undefined && gas !== 0) {
+                const hash = await this.walletClient?.writeContract(
+                    {
+                        address: parameters.contract.address,
+                        abi: parameters.contract.abi,
+                        functionName: parameters.functionName,
+                        args: parameters.args?parameters.args:undefined,
+                        account: this.account
+                    }
+                )
+                this.log?.debug(hash)
+
+                return hash
+            }
+        }
+    }
+
+    // async multicall(parameters: IWriteContractParameters) : Promise<any> {
+
+    //     if (this.publicClient !== undefined) {
+    //         return await this.publicClient?.simulateContract({
+    //             address: parameters.contract.address,
+    //             abi: parameters.contract.abi,
+    //             functionName: parameters.functionName,
+    //             args: parameters.args?parameters.args:undefined,
+    //             account: parameters.account?parameters.account:undefined,
+    //             chain: parameters.chain?parameters.chain:undefined,
+    //             dataSuffix: parameters.dataSuffix?parameters.dataSuffix:undefined
+    //           })
+    //     }
+    // }
 }

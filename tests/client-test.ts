@@ -1,12 +1,13 @@
 import {TonStakingClient} from '../dist/mjs/index'
 import { privateKeyToAccount } from 'viem/accounts'
-import { toHex } from 'viem'
+import { toHex, parseEther } from 'viem'
 
 import dotenv from "dotenv"
 dotenv.config()
 
 const main = async () => {
 
+  /*
     //=============================
     const tsClientMainnet = new TonStakingClient({ chainId: 1,  logLevel: 'debug'})
 
@@ -26,6 +27,8 @@ const main = async () => {
     console.log('Mainnet WTON slot0 : ', mslot0)
 
     console.log('=======================')
+    */
+    /*
     //=============================
     // logLevel: { // 숫자가 낮을 수록 우선순위가 높습니다.
     //     error: 0, == default
@@ -37,14 +40,16 @@ const main = async () => {
     //     silly: 6,
     //     custom: 7
     // },
+    */
 
     const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}`)
     const tsClientSepolia = new TonStakingClient(
       {
         chainId: 11155111,
-        rpcUrl: `${process.env.ETH_NODE_URI_sepolia}`,
-        logLevel: 'debug'
+        rpcUrl: `${process.env.ETH_NODE_URI_SEPOLIA}`,
+        logLevel: 'debug',
       },
+      account  // Required when setting up walletClient. Used when sending transactions to an account.
     )
 
     const tsContractsSepolia = await tsClientSepolia.getContracts()
@@ -66,7 +71,7 @@ const main = async () => {
     console.log('Sepolia '+addr+' balance ', balance)
 
     const contractAddresses = tsClientSepolia.getContractAddresses()
-    /*
+
     //==============================
     const code = await tsClientSepolia.getCode({
       address: contractAddresses!.TON
@@ -84,7 +89,7 @@ const main = async () => {
       toBlock: toHex(toBlock)
     })
     console.log('Sepolia TON Transfer Event Counts ', logs.length)
-    */
+
     //==============================
     const slot0 = await tsClientSepolia.getStorageAt({
       address: contractAddresses!.WTON,
@@ -102,6 +107,23 @@ const main = async () => {
     console.log('Sepolia '+addr+' simulate balance ', res)
 
     //==============================
+    const to = "0xc1eba383D94c6021160042491A5dfaF1d82694E6"
+    const gas = await tsClientSepolia.estimateContractGas({
+      contract: tsContractsSepolia.TON,
+      functionName: 'transfer',
+      args: [to, parseEther('1')]
+    })
+    console.log('Sepolia '+addr+' transfer estimateContractGas : ', gas)
+    //==============================
+
+    const res1 = await tsClientSepolia.writeContract({
+      contract: tsContractsSepolia.TON,
+      functionName: 'transfer',
+      args: [to, parseEther('1')]
+    })
+    console.log('Sepolia '+addr+' transfer hash', res1)
+    //==============================
+
 }
 
 

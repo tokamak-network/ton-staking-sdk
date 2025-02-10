@@ -89,7 +89,7 @@ export interface IGetStorageAtParameters {
     blockTag?: BlockTag | undefined
 }
 
-export interface ISimulateContractParameters {
+export interface IWriteContractParameters {
     contract: GetContractReturnType,
     functionName: string,
     args: Array<any> | undefined,
