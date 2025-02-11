@@ -8,7 +8,8 @@ import {
 } from '@jest/globals';
 
 import {TonStakingClient} from '../dist/cjs/index'
-import { toHex } from 'viem'
+import { toHex, parseEther, Account, WatchContractEventOnLogsFn } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 
 import dotenv from "dotenv"
 dotenv.config()
@@ -89,5 +90,54 @@ describe('\nMainnet interface', () => {
         // console.log('Sepolia '+addr+' simulate balanceOf ', res)
         expect(res.result).toBeGreaterThan(0n);
     });
+
+
+    test("multiReadContracts ", async () => {
+        let res = ( await Client.multiReadContracts({
+            contracts: [
+            {
+                contract: tsContracts.TON,
+                functionName: 'totalSupply',
+            },
+            {
+                contract: tsContracts.TON,
+                functionName: 'balanceOf',
+                args: ['0x2be5e8c109e2197d077d13a82daead6a9b3433c5']
+            },
+            {
+                contract: tsContracts.SeigManager,
+                functionName: 'stakeOf',
+                args: ['0x8aa1497d52624b75cd24294aa1b2d5886493f896']
+            },
+            {
+                contract: tsContracts.SeigManager,
+                functionName: 'stakeOfTotal',
+                args: []
+            },
+            ]
+        })
+        )?.map((v:any)=>v.result)
+
+        expect(res[0]).toBeGreaterThan(0n);
+        expect(res[1]).toBeGreaterThan(0n);
+        expect(res[2]).toBeGreaterThan(0n);
+        expect(res[3]).toBeGreaterThan(0n);
+
+    });
+
+    // test("watchContractEvent ", async () => {
+
+    //     const unwatch =  await Client.watchContractEvent({
+    //         contract: tsContracts.TON,
+    //         eventName: 'Transfer',
+    //         onError: (error: Error)=> console.log(error),
+    //         onLogs: (logs: WatchContractEventOnLogsFn) => {
+    //             console.log(logs)
+    //         //   unwatch()
+    //         }
+    //     })
+    //     unwatch()
+    // });
+
 });
 

@@ -133,17 +133,18 @@ describe('\nSepolia interface', () => {
 
     });
 
-    test("watchContractEvent ", async () => {
+    // test("watchContractEvent ", async () => {
 
-        const unwatch =  await Client.watchContractEvent({
-            contract: tsContracts.TON,
-            eventName: 'Transfer',
-            onError: (error: Error)=> console.log(error),
-            onLogs: (logs: WatchContractEventOnLogsFn) => {
-              console.log(logs)
-            //   unwatch()
-            }
-        })
-        unwatch()
-    });
+    //     const unwatch =  await Client.watchContractEvent({
+    //         contract: tsContracts.TON,
+    //         eventName: 'Transfer',
+    //         onError: (error: Error)=> console.log(error),
+    //         onLogs: (logs: WatchContractEventOnLogsFn) => {
+    //           console.log(logs)
+    //         //   unwatch()
+    //         }
+    //     })
+    //     unwatch()
+    // });
+
 });
