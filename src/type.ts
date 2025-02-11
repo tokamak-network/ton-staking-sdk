@@ -11,8 +11,10 @@ import {
     BlockNumber,
     Hex,
     Account,
-    Chain
-  } from 'viem';
+    Chain,
+    ContractFunctionParameters,
+    WatchContractEventOnLogsFn,
+} from 'viem';
 
 export interface TransformableInfo {
   level: string;
@@ -97,4 +99,29 @@ export interface IWriteContractParameters {
     chain?: Chain | undefined
     /** Data to append to the end of the calldata. Useful for adding a ["domain" tag](https://opensea.notion.site/opensea/Seaport-Order-Attributions-ec2d69bf455041a5baa490941aad307f). */
     dataSuffix?: Hex | undefined
+}
+
+export interface IMulticallFunctionParameters {
+    contract: GetContractReturnType,
+    functionName: string,
+    args?: Array<any> | undefined,
+}
+
+export interface IMulticallParameters {
+    contracts: Array<IMulticallFunctionParameters>,
+    allowFailure?: boolean| undefined,
+    options?: {
+        optional?: boolean
+        properties?: Record<string, any>
+    }| undefined,
+}
+
+
+export interface IWatchContractEventParameters {
+    contract: GetContractReturnType,
+    eventName: ContractEventName<Abi> | string | undefined,
+    args?: ContractEventArgs | undefined,
+    fromBlock?:  BlockNumber<bigint> | undefined,
+    onError?: ((error: Error) => void) | undefined
+    onLogs: WatchContractEventOnLogsFn
 }

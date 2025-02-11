@@ -116,14 +116,60 @@ const main = async () => {
     console.log('Sepolia '+addr+' transfer estimateContractGas : ', gas)
     //==============================
 
-    const res1 = await tsClientSepolia.writeContract({
-      contract: tsContractsSepolia.TON,
-      functionName: 'transfer',
-      args: [to, parseEther('1')]
-    })
-    console.log('Sepolia '+addr+' transfer hash', res1)
+    // const res1 = await tsClientSepolia.writeContract({
+    //   contract: tsContractsSepolia.TON,
+    //   functionName: 'transfer',
+    //   args: [to, parseEther('1')]
+    // })
+    // console.log('Sepolia '+addr+' transfer hash', res1)
+
     //==============================
 
+    console.log('tsContractsSepolia.TON', tsContractsSepolia.TON.address)
+    console.log('tsContractsSepolia.SeigManager', tsContractsSepolia.SeigManager.address)
+
+    let res1 =
+     ( await tsClientSepolia.multiReadContracts({
+        contracts: [
+          {
+            contract: tsContractsSepolia.TON,
+            functionName: 'totalSupply',
+          },
+          {
+            contract: tsContractsSepolia.TON,
+            functionName: 'balanceOf',
+            args: ['0xc1eba383D94c6021160042491A5dfaF1d82694E6']
+          },
+          {
+            contract: tsContractsSepolia.SeigManager,
+            functionName: 'stakeOf',
+            args: ['0xc1eba383D94c6021160042491A5dfaF1d82694E6']
+          },
+          {
+            contract: tsContractsSepolia.SeigManager,
+            functionName: 'stakeOfTotal',
+            args: []
+          },
+        ]
+      })
+    )?.map((v)=>v.result)
+
+    console.log('Sepolia multiReadContracts', res1)
+
+    //==============================
+    const unwatch =  await tsClientSepolia.watchContractEvent({
+      contract: tsContractsSepolia.TON,
+      eventName: 'Transfer',
+      onError: error => console.log(error),
+      onLogs: logs => {
+        console.log(logs)
+        unwatch()
+      }
+    })
+
+    console.log('Sepolia watchContractEvent unwatch', unwatch)
+
+    //==============================
 }
 
 

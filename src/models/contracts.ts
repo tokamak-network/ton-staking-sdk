@@ -59,12 +59,12 @@ export async function getTonStakingContracts(
       var contracts: ITonStakingContracts = {
         TON : await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
         WTON : await getContract({ address: contractAddresses.WTON, abi: contractAbis.WTON, client: client,}),
-        Layer2Registry : await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
-        DepositManager : await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
-        SeigManager : await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
-        SwapProxy : await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
-        DAOCommittee : await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
-        DAOAgendaManager: await getContract({ address: contractAddresses.TON, abi: contractAbis.TON, client: client,}),
+        Layer2Registry : await getContract({ address: contractAddresses.Layer2Registry, abi: contractAbis.Layer2Registry, client: client,}),
+        DepositManager : await getContract({ address: contractAddresses.DepositManager, abi: contractAbis.DepositManager, client: client,}),
+        SeigManager : await getContract({ address: contractAddresses.SeigManager, abi: contractAbis.SeigManager, client: client,}),
+        SwapProxy : await getContract({ address: contractAddresses.SwapProxy, abi: [], client: client,}),
+        DAOCommittee : await getContract({ address: contractAddresses.DAOCommittee, abi: contractAbis.DAOCommittee, client: client,}),
+        DAOAgendaManager: await getContract({ address: contractAddresses.DAOAgendaManager, abi: contractAbis.DAOAgendaManager, client: client,}),
       }
       return contracts;
     }

@@ -8,20 +8,25 @@ import {
 } from '@jest/globals';
 
 import {TonStakingClient} from '../dist/cjs/index'
-import { toHex } from 'viem'
+import { toHex, parseEther, Account, WatchContractEventOnLogsFn } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 
 import dotenv from "dotenv"
 dotenv.config()
 
 let Client: any, tsContracts:any, tsContractAddresses: any
+let account: Account
 
 describe('\nSepolia interface', () => {
     beforeAll(async() => {
+        account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}`)
+
         Client = new TonStakingClient(
             {
               chainId: 11155111,
               rpcUrl: `${process.env.ETH_NODE_URI_SEPOLIA}`
             },
+            account
           )
         tsContracts = await Client.getContracts()
         tsContractAddresses = Client.getContractAddresses()
@@ -85,5 +90,60 @@ describe('\nSepolia interface', () => {
         expect(res.result).toBeGreaterThan(0n);
     });
 
+    test("estimateContractGas ", async () => {
+        const to = "0xc1eba383D94c6021160042491A5dfaF1d82694E6"
+        const gas = await Client.estimateContractGas({
+            contract: tsContracts.TON,
+            functionName: 'transfer',
+            args: [to, parseEther('1')]
+        })
+        expect(gas).toBeGreaterThan(0);
+    });
 
+    test("multiReadContracts ", async () => {
+        let res = ( await Client.multiReadContracts({
+            contracts: [
+            {
+                contract: tsContracts.TON,
+                functionName: 'totalSupply',
+            },
+            {
+                contract: tsContracts.TON,
+                functionName: 'balanceOf',
+                args: ['0xc1eba383D94c6021160042491A5dfaF1d82694E6']
+            },
+            {
+                contract: tsContracts.SeigManager,
+                functionName: 'stakeOf',
+                args: ['0xc1eba383D94c6021160042491A5dfaF1d82694E6']
+            },
+            {
+                contract: tsContracts.SeigManager,
+                functionName: 'stakeOfTotal',
+                args: []
+            },
+            ]
+        })
+        )?.map((v:any)=>v.result)
+
+        expect(res[0]).toBeGreaterThan(0n);
+        expect(res[1]).toBeGreaterThan(0n);
+        expect(res[2]).toBeGreaterThan(0n);
+        expect(res[3]).toBeGreaterThan(0n);
+
+    });
+
+    test("watchContractEvent ", async () => {
+
+        const unwatch =  await Client.watchContractEvent({
+            contract: tsContracts.TON,
+            eventName: 'Transfer',
+            onError: (error: Error)=> console.log(error),
+            onLogs: (logs: WatchContractEventOnLogsFn) => {
+              console.log(logs)
+            //   unwatch()
+            }
+        })
+        unwatch()
+    });
 });

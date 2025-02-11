@@ -5,7 +5,11 @@ import {
     IGetContractEventsParameters,
     ITonStakingContractAddresses,
     IWriteContractParameters,
-    IGetStorageAtParameters } from 'type';
+    IMulticallParameters,
+    IGetStorageAtParameters,
+    IMulticallFunctionParameters,
+    IWatchContractEventParameters
+} from 'type';
 import { getChain } from './configs/chains';
 import { getContractAddresses as getCAddress} from './configs/addresses';
 import {
@@ -20,7 +24,12 @@ import {
     Address,
     GetCodeParameters,
     GetStorageAtParameters,
-    GetContractEventsParameters } from 'viem';
+    GetContractEventsParameters,
+    MulticallParameters,
+    ContractFunctionParameters,
+    MulticallReturnType,
+    WatchContractEventParameters,
+ } from 'viem';
 import { getTonStakingContracts } from './models/contracts';
 import { Logger } from 'winston';
 import { logger } from './configs/logger'
@@ -119,6 +128,34 @@ export class TonStakingClient  {
         }
     }
 
+    async multiReadContracts<
+        const contracts extends readonly unknown[],
+        allowFailure extends boolean = true,
+    >(parameters: IMulticallParameters) : Promise<MulticallReturnType<contracts, allowFailure> | undefined> {
+
+        if (this.publicClient !== undefined) {
+
+            let items:Array<ContractFunctionParameters> = []
+            for(let i=0; i< parameters.contracts.length; ++i) {
+
+                let contract:IMulticallFunctionParameters = parameters.contracts[i]
+                items.push(
+                    {
+                        address: contract.contract.address,
+                        abi: contract.contract.abi,
+                        functionName: contract.functionName,
+                        args: contract.args,
+                    }
+                )
+            }
+
+            return await this.publicClient?.multicall({
+                contracts: items,
+                allowFailure: true
+            })
+        }
+    }
+
     async getCode(parameters: GetCodeParameters) : Promise<any> {
 
         if (this.publicClient !== undefined) {
@@ -214,18 +251,18 @@ export class TonStakingClient  {
         }
     }
 
-    // async multicall(parameters: IWriteContractParameters) : Promise<any> {
+    async watchContractEvent(parameters: IWatchContractEventParameters) : Promise<any> {
 
-    //     if (this.publicClient !== undefined) {
-    //         return await this.publicClient?.simulateContract({
-    //             address: parameters.contract.address,
-    //             abi: parameters.contract.abi,
-    //             functionName: parameters.functionName,
-    //             args: parameters.args?parameters.args:undefined,
-    //             account: parameters.account?parameters.account:undefined,
-    //             chain: parameters.chain?parameters.chain:undefined,
-    //             dataSuffix: parameters.dataSuffix?parameters.dataSuffix:undefined
-    //           })
-    //     }
-    // }
+        if (this.publicClient !== undefined) {
+            return await this.publicClient?.watchContractEvent({
+                address: parameters.contract.address,
+                abi: parameters.contract.abi,
+                eventName: parameters.eventName,
+                args: parameters.args?parameters.args:undefined,
+                fromBlock:  parameters.fromBlock?parameters.fromBlock:undefined,
+                onError: parameters.onError?parameters.onError:undefined,
+                onLogs: parameters.onLogs?parameters.onLogs:undefined
+              })
+        }
+    }
 }
