@@ -1,29 +1,27 @@
 import {
-    IClientConfig, ITonStakingContracts,
+    ITonStakingContracts,
     IClients,
     ITonStakingContractAddresses,
-    ITonStakingContractAbi } from 'type';
+    ITonStakingContractAbi,
+    ITonStakingContractsInfo,
+  } from 'type';
 
-import { getChain } from '../configs/chains';
 import { getContractAddresses } from '../configs/addresses';
 import { getContractAbi } from '../configs/abis';
 
 import {
+    Client,
     getContract,
-    Chain,
     PublicClient,
-    Account,
-    Address,
     WalletClient,
-    Abi
   } from 'viem';
 
-import {Logger} from 'winston';
+// import {Logger} from 'winston';
 
 export async function getTonStakingContracts(
     publicClient: PublicClient | undefined,
     walletClient: WalletClient | undefined,
-    log: Logger | undefined
+    // log: Logger | undefined
 ) : Promise<ITonStakingContracts | undefined> {
 
     var chainId:number| any
@@ -48,10 +46,10 @@ export async function getTonStakingContracts(
       chainId = await walletClient?.getChainId()
     }
 
-    log?.debug({chainId : chainId})
+    // log?.debug({chainId : chainId})
 
     contractAddresses = getContractAddresses(chainId)
-    log?.debug({contractAddresses : contractAddresses})
+    // log?.debug({contractAddresses : contractAddresses})
 
     if (contractAddresses != undefined) {
       contractAbis = getContractAbi()
@@ -71,3 +69,47 @@ export async function getTonStakingContracts(
     return undefined;
 
 }
+
+
+export function getContractInfos(chainId: number) : ITonStakingContractsInfo {
+  var contractAbis = getContractAbi()
+  var contractAddress = getContractAddresses(chainId)
+
+  return {
+      TON: {
+        address: contractAddress?.TON,
+        abi: contractAbis?.TON,
+      },
+      WTON: {
+        address: contractAddress?.WTON,
+        abi: contractAbis?.WTON,
+      },
+      Layer2Registry: {
+        address: contractAddress?.Layer2Registry,
+        abi: contractAbis?.Layer2Registry,
+      },
+      DepositManager: {
+        address: contractAddress?.DepositManager,
+        abi: contractAbis?.DepositManager,
+      },
+      SeigManager: {
+        address: contractAddress?.SeigManager,
+        abi: contractAbis?.SeigManager,
+      },
+      SwapProxy: {
+        address: contractAddress?.SwapProxy,
+        abi: [],
+      },
+      DAOCommittee : {
+        address: contractAddress?.DAOCommittee,
+        abi: contractAbis?.DAOCommittee,
+      },
+      DAOAgendaManager: {
+        address: contractAddress?.DAOAgendaManager,
+        abi: contractAbis?.DAOAgendaManager,
+      }
+  }
+
+}
+
+

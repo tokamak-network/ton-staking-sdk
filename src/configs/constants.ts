@@ -10,7 +10,7 @@
  * @module Constants
  */
 
-export const ContractNameForAbi = {
+export const ContractNames = {
     TON: "TON",
     WTON: "WTON",
     Layer2Registry: "Layer2Registry",
@@ -22,7 +22,6 @@ export const ContractNameForAbi = {
     Coinage: "Coinage",
     Candidate: "Candidate",
 }
-
 
 /**
  * Quantity of decimal places of WEI uint

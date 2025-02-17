@@ -1,4 +1,4 @@
-import {TonStakingClient} from '../dist/mjs/index'
+import {TonStakingClient, ContractNames} from '../dist/mjs/index'
 import { privateKeyToAccount } from 'viem/accounts'
 import { toHex, parseEther } from 'viem'
 
@@ -9,7 +9,10 @@ const main = async () => {
 
   /*
     //=============================
-    const tsClientMainnet = new TonStakingClient({ chainId: 1,  logLevel: 'debug'})
+    const tsClientMainnet = new TonStakingClient({
+      chainId: 1,
+      // logLevel: 'debug'
+    })
 
     const tsContractsMainnet = await tsClientMainnet.getContracts()
 
@@ -47,15 +50,14 @@ const main = async () => {
       {
         chainId: 11155111,
         rpcUrl: `${process.env.ETH_NODE_URI_SEPOLIA}`,
-        logLevel: 'debug',
+        // logLevel: 'debug',
       },
       account  // Required when setting up walletClient. Used when sending transactions to an account.
     )
 
-    const tsContractsSepolia = await tsClientSepolia.getContracts()
     //==============================
     const data1 = await tsClientSepolia.readContract({
-        contract: tsContractsSepolia.TON,
+        contract: ContractNames.TON,
         functionName: 'totalSupply',
       })
 
@@ -64,7 +66,7 @@ const main = async () => {
     //==============================
     const addr = '0x757DE9c340c556b56f62eFaE859Da5e08BAAE7A2'
     const balance = await tsClientSepolia.readContract({
-      contract: tsContractsSepolia.TON,
+      contract: ContractNames.TON,
       functionName: 'balanceOf',
       args: [addr]
     })
@@ -83,7 +85,7 @@ const main = async () => {
     const fromBlock = 6401948
     const toBlock = 7649618
     const logs = await tsClientSepolia.getContractEvents({
-      contract: tsContractsSepolia.TON,
+      contract: ContractNames.TON,
       eventName: 'Transfer',
       fromBlock: toHex(fromBlock),
       toBlock: toHex(toBlock)
@@ -100,7 +102,7 @@ const main = async () => {
 
     //==============================
     const res = await tsClientSepolia.simulateContract({
-      contract: tsContractsSepolia.TON,
+      contract: ContractNames.TON,
       functionName: 'balanceOf',
       args: [addr]
     })
@@ -109,44 +111,40 @@ const main = async () => {
     //==============================
     const to = "0xc1eba383D94c6021160042491A5dfaF1d82694E6"
     const gas = await tsClientSepolia.estimateContractGas({
-      contract: tsContractsSepolia.TON,
+      contract: ContractNames.TON,
       functionName: 'transfer',
       args: [to, parseEther('1')]
     })
     console.log('Sepolia '+addr+' transfer estimateContractGas : ', gas)
     //==============================
 
-    // const res1 = await tsClientSepolia.writeContract({
-    //   contract: tsContractsSepolia.TON,
-    //   functionName: 'transfer',
-    //   args: [to, parseEther('1')]
-    // })
-    // console.log('Sepolia '+addr+' transfer hash', res1)
+    const res0 = await tsClientSepolia.writeContract({
+      contract: ContractNames.TON,
+      functionName: 'transfer',
+      args: [to, parseEther('1')]
+    })
+    console.log('Sepolia '+addr+' transfer hash', res0)
 
     //==============================
-
-    console.log('tsContractsSepolia.TON', tsContractsSepolia.TON.address)
-    console.log('tsContractsSepolia.SeigManager', tsContractsSepolia.SeigManager.address)
-
     let res1 =
      ( await tsClientSepolia.multiReadContracts({
         contracts: [
           {
-            contract: tsContractsSepolia.TON,
+            contract: ContractNames.TON,
             functionName: 'totalSupply',
           },
           {
-            contract: tsContractsSepolia.TON,
+            contract: ContractNames.TON,
             functionName: 'balanceOf',
             args: ['0xc1eba383D94c6021160042491A5dfaF1d82694E6']
           },
           {
-            contract: tsContractsSepolia.SeigManager,
+            contract: ContractNames.SeigManager,
             functionName: 'stakeOf',
             args: ['0xc1eba383D94c6021160042491A5dfaF1d82694E6']
           },
           {
-            contract: tsContractsSepolia.SeigManager,
+            contract: ContractNames.SeigManager,
             functionName: 'stakeOfTotal',
             args: []
           },
@@ -158,16 +156,17 @@ const main = async () => {
 
     //==============================
     const unwatch =  await tsClientSepolia.watchContractEvent({
-      contract: tsContractsSepolia.TON,
+      contract: ContractNames.TON,
       eventName: 'Transfer',
       onError: error => console.log(error),
       onLogs: logs => {
         console.log(logs)
-        unwatch()
+        // unwatch()
       }
     })
-
     console.log('Sepolia watchContractEvent unwatch', unwatch)
+
+    unwatch()
 
     //==============================
 }

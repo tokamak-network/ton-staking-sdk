@@ -40,13 +40,13 @@ export const getChainId = (chanName: String) => {
   }
 }
 
-export const getChain = (chanId: Number): Chain | undefined => {
+export const getChain = (chanId: Number): Chain => {
   switch (chanId) {
     case ChainId.MAINNET:
       return mainnet
     case ChainId.SEPOLIA:
       return sepolia
     default:
-      return undefined
+      return mainnet
   }
 }

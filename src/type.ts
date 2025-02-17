@@ -1,7 +1,6 @@
 import {
     GetContractReturnType,
     BlockTag,
-    GetContractEventsParameters,
     PublicClient,
     WalletClient,
     Address,
@@ -12,9 +11,56 @@ import {
     Hex,
     Account,
     Chain,
-    ContractFunctionParameters,
     WatchContractEventOnLogsFn,
+    MulticallReturnType,
+    GetCodeParameters,
+    HttpTransport
 } from 'viem';
+
+export {
+    GetContractReturnType,
+    BlockTag,
+    PublicClient,
+    WalletClient,
+    Address,
+    Abi,
+    ContractEventArgs,
+    ContractEventName,
+    BlockNumber,
+    Hex,
+    Account,
+    Chain,
+    WatchContractEventOnLogsFn,
+    MulticallReturnType,
+    GetCodeParameters
+}
+
+
+export interface ITonStakingClient {
+    inConfig: IClientConfig;
+    publicClient: PublicClient | any;
+    walletClient: WalletClient | any;
+    account: Account | Address | undefined
+
+    setPublicClient(): void
+    setWalletClient(account : Account | Address | undefined) : void
+    getContracts() : Promise<ITonStakingContracts | undefined>
+    getContractInfos() : Promise<ITonStakingContractsInfo | undefined>
+    getContractAbi() : ITonStakingContractAbi | undefined
+    getContractAddresses() : ITonStakingContractAddresses | undefined
+    readContract(parameters: IReadContractParameters) : Promise<any>
+    multiReadContracts<
+        const contracts extends readonly unknown[],
+        allowFailure extends boolean = true,
+    >(parameters: IMulticallParameters) : Promise<MulticallReturnType<contracts, allowFailure> | undefined>
+    getCode(parameters: GetCodeParameters) : Promise<any>
+    getContractEvents(parameters: IGetContractEventsParameters) : Promise<any>
+    getStorageAt(parameters: IGetStorageAtParameters) : Promise<any>
+    simulateContract(parameters: IWriteContractParameters) : Promise<any>
+    estimateContractGas(parameters: IWriteContractParameters) : Promise<any>
+    writeContract(parameters: IWriteContractParameters) : Promise<any>
+    watchContractEvent(parameters: IWatchContractEventParameters) : Promise<any>
+}
 
 export interface TransformableInfo {
   level: string;
@@ -25,6 +71,7 @@ export interface TransformableInfo {
 export interface IClientConfig {
     chainId: number,
     rpcUrl?: string | undefined,
+    http?: HttpTransport | undefined,
     logLevel?: string | undefined
     logPath?: string | undefined
 }
@@ -43,6 +90,22 @@ export interface ITonStakingContracts {
     SwapProxy: GetContractReturnType,
     DAOCommittee : GetContractReturnType,
     DAOAgendaManager: GetContractReturnType,
+}
+
+export interface IContractInfo {
+    address: Address,
+    abi: Abi
+}
+
+export interface ITonStakingContractsInfo {
+    TON: IContractInfo,
+    WTON: IContractInfo,
+    Layer2Registry: IContractInfo,
+    DepositManager: IContractInfo,
+    SeigManager: IContractInfo,
+    SwapProxy: IContractInfo,
+    DAOCommittee : IContractInfo,
+    DAOAgendaManager: IContractInfo
 }
 
 export interface ITonStakingContractAddresses {
@@ -70,17 +133,17 @@ export interface ITonStakingContractAbi {
 }
 
 export interface IReadContractParameters {
-    contract: GetContractReturnType,
+    contract: string,
     functionName: string,
     args: Array<any> | undefined
 }
 
 export interface IGetContractEventsParameters {
-    contract: GetContractReturnType,
+    contract: string,
     args: ContractEventArgs | undefined,
     eventName: ContractEventName<Abi> | string | undefined,
     strict: boolean | undefined,
-    fromBlock: BlockNumber | BlockTag | string | undefined,
+    fromBlock: BlockNumber | BlockTag | undefined,
     toBlock: BlockNumber | BlockTag | undefined,
 }
 
@@ -92,9 +155,9 @@ export interface IGetStorageAtParameters {
 }
 
 export interface IWriteContractParameters {
-    contract: GetContractReturnType,
+    contract: string,
     functionName: string,
-    args: Array<any> | undefined,
+    args: Array<any>,
     account?: Account | Address | null | undefined
     chain?: Chain | undefined
     /** Data to append to the end of the calldata. Useful for adding a ["domain" tag](https://opensea.notion.site/opensea/Seaport-Order-Attributions-ec2d69bf455041a5baa490941aad307f). */
@@ -102,7 +165,7 @@ export interface IWriteContractParameters {
 }
 
 export interface IMulticallFunctionParameters {
-    contract: GetContractReturnType,
+    contract: string,
     functionName: string,
     args?: Array<any> | undefined,
 }
@@ -118,7 +181,7 @@ export interface IMulticallParameters {
 
 
 export interface IWatchContractEventParameters {
-    contract: GetContractReturnType,
+    contract: string,
     eventName: ContractEventName<Abi> | string | undefined,
     args?: ContractEventArgs | undefined,
     fromBlock?:  BlockNumber<bigint> | undefined,

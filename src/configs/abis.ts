@@ -5,41 +5,41 @@
  * LICENSE file in the root directory of this source tree.
  */
 import { ITonStakingContractAbi } from '../type';
-import { ContractNameForAbi } from './constants';
+import { ContractNames } from './constants';
 import { Abi } from 'viem';
 
-import { abi as TONAbi } from '../abis/TON.json';
-import { abi as WTONAbi } from '../abis/WTON.json';
-import { abi as Layer2RegistryAbi } from '../abis/Layer2Registry.json';
-import { abi as DepositManagerAbi } from '../abis/DepositManager.json';
-import { abi as SeigManagerAbi } from '../abis/SeigManager.json';
-import { abi as DAOCommitteeAbi } from '../abis/DAOCommittee.json';
-import { abi as DAOAgendaManagerAbi } from '../abis/DAOAgendaManager.json';
-import { abi as ProxyAbi } from '../abis/DepositManagerProxy.json';
-import { abi as AutoRefactorCoinageAbi } from '../abis/AutoRefactorCoinage.json';
-import { abi as CandidateAbi } from '../abis/Candidate.json';
+import { abi as TONAbi } from './abiRaw/TON.json';
+import { abi as WTONAbi } from './abiRaw/WTON.json';
+import { abi as Layer2RegistryAbi } from './abiRaw/Layer2Registry.json';
+import { abi as DepositManagerAbi } from './abiRaw/DepositManager.json';
+import { abi as SeigManagerAbi } from './abiRaw/SeigManager.json';
+import { abi as DAOCommitteeAbi } from './abiRaw/DAOCommittee.json';
+import { abi as DAOAgendaManagerAbi } from './abiRaw/DAOAgendaManager.json';
+import { abi as ProxyAbi } from './abiRaw/DepositManagerProxy.json';
+import { abi as AutoRefactorCoinageAbi } from './abiRaw/AutoRefactorCoinage.json';
+import { abi as CandidateAbi } from './abiRaw/Candidate.json';
 
 export const ContractAbi = (name: string): Abi  => {
     switch (name) {
-        case ContractNameForAbi.TON :
+        case ContractNames.TON :
             return TONAbi as Abi
-        case ContractNameForAbi.WTON :
+        case ContractNames.WTON :
             return WTONAbi as Abi
-        case ContractNameForAbi.Layer2Registry :
+        case ContractNames.Layer2Registry :
             return Layer2RegistryAbi as Abi
-        case ContractNameForAbi.DepositManager :
+        case ContractNames.DepositManager :
             return DepositManagerAbi as Abi
-        case ContractNameForAbi.SeigManager :
+        case ContractNames.SeigManager :
             return SeigManagerAbi as Abi
-        case ContractNameForAbi.DAOCommittee :
+        case ContractNames.DAOCommittee :
             return DAOCommitteeAbi as Abi
-        case ContractNameForAbi.DAOAgendaManager :
+        case ContractNames.DAOAgendaManager :
             return DAOAgendaManagerAbi as Abi
-        case ContractNameForAbi.Proxy :
+        case ContractNames.Proxy :
             return ProxyAbi as Abi
-        case ContractNameForAbi.Coinage :
+        case ContractNames.Coinage :
             return AutoRefactorCoinageAbi as Abi
-        case ContractNameForAbi.Candidate :
+        case ContractNames.Candidate :
             return CandidateAbi as Abi
         default:
             return [] as Abi

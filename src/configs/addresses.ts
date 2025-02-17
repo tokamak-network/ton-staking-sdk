@@ -31,7 +31,7 @@ export const sepolia_contracts: ITonStakingContractAddresses  = {
 }
 
 
-export const getContractAddresses = (chainId: number | undefined ) : ITonStakingContractAddresses | undefined => {
+export const getContractAddresses = (chainId: number | undefined ) : ITonStakingContractAddresses => {
 
     switch (chainId) {
         case ChainId.MAINNET:
@@ -39,6 +39,6 @@ export const getContractAddresses = (chainId: number | undefined ) : ITonStaking
         case ChainId.SEPOLIA:
             return sepolia_contracts
         default:
-            return undefined
+            return mainnet_contracts
     }
 }
