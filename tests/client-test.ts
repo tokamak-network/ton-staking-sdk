@@ -16,7 +16,7 @@ const main = async () => {
 
     const tsContractsMainnet = await tsClientMainnet.getContracts()
 
-    const data = await tsClientMainnet.readContract({
+    const data = await tsClientMainnet.readContractWithName({
         contract: tsContractsMainnet.TON,
         functionName: 'totalSupply',
       })
@@ -56,7 +56,7 @@ const main = async () => {
     )
 
     //==============================
-    const data1 = await tsClientSepolia.readContract({
+    const data1 = await tsClientSepolia.readContractWithName({
         contract: ContractNames.TON,
         functionName: 'totalSupply',
       })
@@ -65,7 +65,7 @@ const main = async () => {
 
     //==============================
     const addr = '0x757DE9c340c556b56f62eFaE859Da5e08BAAE7A2'
-    const balance = await tsClientSepolia.readContract({
+    const balance = await tsClientSepolia.readContractWithName({
       contract: ContractNames.TON,
       functionName: 'balanceOf',
       args: [addr]
@@ -127,7 +127,7 @@ const main = async () => {
 
     //==============================
     let res1 =
-     ( await tsClientSepolia.multiReadContracts({
+     ( await tsClientSepolia.multiReadContractsWithName({
         contracts: [
           {
             contract: ContractNames.TON,
@@ -152,7 +152,7 @@ const main = async () => {
       })
     )?.map((v)=>v.result)
 
-    console.log('Sepolia multiReadContracts', res1)
+    console.log('Sepolia multiReadContractsWithName', res1)
 
     //==============================
     const unwatch =  await tsClientSepolia.watchContractEvent({
@@ -167,6 +167,45 @@ const main = async () => {
     console.log('Sepolia watchContractEvent unwatch', unwatch)
 
     unwatch()
+
+    //==============================
+
+    const numLayer2s = await tsClientSepolia.readContractWithName({
+      contract: ContractNames.Layer2Registry,
+      functionName: 'numLayer2s',
+      args: []
+    })
+    console.log('numLayer2s ', numLayer2s)
+
+    //==============================
+    const infos = await tsClientSepolia.getContractInfos()
+    const layer2ByIndex0 = await tsClientSepolia.readContract({
+      address: infos.Layer2Registry.address,
+      abi: infos.Layer2Registry.abi,
+      functionName: 'layer2ByIndex',
+      args: [0]
+    })
+    console.log('layer2ByIndex0 ', layer2ByIndex0)
+
+    //==============================
+    const candidateInfos = await tsClientSepolia.multiReadContracts({
+        contracts: [
+          {
+            address: layer2ByIndex0,
+            abi: infos.Candidate.abi,
+            functionName: 'operator',
+            args: []
+          },
+          {
+            address: layer2ByIndex0,
+            abi: infos.Candidate.abi,
+            functionName: 'totalStaked',
+            args: []
+          }
+        ]
+      }
+    )
+    console.log('candidateInfos ', candidateInfos)
 
     //==============================
 }

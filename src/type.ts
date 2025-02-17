@@ -48,11 +48,17 @@ export interface ITonStakingClient {
     getContractInfos() : Promise<ITonStakingContractsInfo | undefined>
     getContractAbi() : ITonStakingContractAbi | undefined
     getContractAddresses() : ITonStakingContractAddresses | undefined
-    readContract(parameters: IReadContractParameters) : Promise<any>
+    readContractWithName(parameters: IReadContractParameters) : Promise<any>
+    readContract(parameters: IReadContract) : Promise<any>
+    multiReadContractsWithName<
+        const contracts extends readonly unknown[],
+        allowFailure extends boolean = true,
+    >(parameters: IMulticallParametersWithName) : Promise<MulticallReturnType<contracts, allowFailure> | undefined>
     multiReadContracts<
         const contracts extends readonly unknown[],
         allowFailure extends boolean = true,
     >(parameters: IMulticallParameters) : Promise<MulticallReturnType<contracts, allowFailure> | undefined>
+
     getCode(parameters: GetCodeParameters) : Promise<any>
     getContractEvents(parameters: IGetContractEventsParameters) : Promise<any>
     getStorageAt(parameters: IGetStorageAtParameters) : Promise<any>
@@ -105,7 +111,8 @@ export interface ITonStakingContractsInfo {
     SeigManager: IContractInfo,
     SwapProxy: IContractInfo,
     DAOCommittee : IContractInfo,
-    DAOAgendaManager: IContractInfo
+    DAOAgendaManager: IContractInfo,
+    Candidate: IContractInfo
 }
 
 export interface ITonStakingContractAddresses {
@@ -138,6 +145,13 @@ export interface IReadContractParameters {
     args: Array<any> | undefined
 }
 
+export interface IReadContract {
+    address: Address,
+    abi: Abi,
+    functionName: string,
+    args: Array<any> | undefined
+}
+
 export interface IGetContractEventsParameters {
     contract: string,
     args: ContractEventArgs | undefined,
@@ -164,8 +178,24 @@ export interface IWriteContractParameters {
     dataSuffix?: Hex | undefined
 }
 
-export interface IMulticallFunctionParameters {
+export interface IMulticallFunctionParametersWithName {
     contract: string,
+    functionName: string,
+    args?: Array<any> | undefined,
+}
+
+export interface IMulticallParametersWithName {
+    contracts: Array<IMulticallFunctionParametersWithName>,
+    allowFailure?: boolean| undefined,
+    options?: {
+        optional?: boolean
+        properties?: Record<string, any>
+    }| undefined,
+}
+
+export interface IMulticallFunctionParameters {
+    address: Address,
+    abi: Abi,
     functionName: string,
     args?: Array<any> | undefined,
 }
@@ -178,7 +208,6 @@ export interface IMulticallParameters {
         properties?: Record<string, any>
     }| undefined,
 }
-
 
 export interface IWatchContractEventParameters {
     contract: string,

@@ -5,13 +5,16 @@ import {
     IGetContractEventsParameters,
     ITonStakingContractAddresses,
     IWriteContractParameters,
-    IMulticallParameters,
     IGetStorageAtParameters,
+    IMulticallParameters,
+    IMulticallParametersWithName,
     IMulticallFunctionParameters,
+    IMulticallFunctionParametersWithName,
     IWatchContractEventParameters,
     ITonStakingContractAbi,
     ITonStakingContractsInfo,
-    IContractInfo
+    IContractInfo,
+    IReadContract
 } from 'type';
 import { getChain, } from './configs/chains';
 import { getContractAddresses as getCAddress} from './configs/addresses';
@@ -182,7 +185,18 @@ export class TonStakingClient  {
         return this.contractAddresses
     }
 
-    async readContract(parameters: IReadContractParameters) : Promise<any> {
+    async readContract(parameters: IReadContract) : Promise<any> {
+        if (this.publicClient !== undefined && this.contractInfos != undefined) {
+            return await this.publicClient?.readContract({
+                    address: parameters.address,
+                    abi: parameters.abi,
+                    functionName: parameters.functionName,
+                    args: parameters.args?parameters.args: []
+            })
+        }
+    }
+
+    async readContractWithName(parameters: IMulticallFunctionParametersWithName) : Promise<any> {
         if (this.publicClient !== undefined && this.contractInfos != undefined) {
             const conInfo = getContractInfo(this.contractInfos, parameters.contract)
             if (conInfo != undefined) {
@@ -201,6 +215,33 @@ export class TonStakingClient  {
         const contracts extends readonly unknown[],
         allowFailure extends boolean = true,
     >(parameters: IMulticallParameters) : Promise<
+    ({ error?: undefined; result: unknown; status: "success"; }
+        | { error: Error; result?: undefined; status: "failure"; })[] | undefined> {
+
+        if (this.publicClient !== undefined) {
+            let items:Array<ContractFunctionParameters> = []
+            for(let i=0; i< parameters.contracts.length; ++i) {
+                items.push(
+                    {
+                        address: parameters.contracts[i].address,
+                        abi: parameters.contracts[i].abi,
+                        functionName: parameters.contracts[i].functionName,
+                        args: parameters.contracts[i].args,
+                    }
+                )
+            }
+
+            return await this.publicClient?.multicall({
+                contracts: items,
+                allowFailure: true
+            })
+        }
+    }
+
+    async multiReadContractsWithName<
+        const contracts extends readonly unknown[],
+        allowFailure extends boolean = true,
+    >(parameters: IMulticallParametersWithName) : Promise<
     ({ error?: undefined; result: unknown; status: "success"; }
         | { error: Error; result?: undefined; status: "failure"; })[] | undefined> {
 

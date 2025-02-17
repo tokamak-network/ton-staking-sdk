@@ -1,6 +1,6 @@
 {
   "name": "@tokamak-network/ton-staking-sdk",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "This is an SDK that allows you to easily use the functions of the TON staking contract.",
   "main": "dist/cjs/index.js",
   "typings": "dist/index.d.ts",

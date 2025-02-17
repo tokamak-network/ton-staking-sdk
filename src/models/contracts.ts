@@ -107,6 +107,10 @@ export function getContractInfos(chainId: number) : ITonStakingContractsInfo {
       DAOAgendaManager: {
         address: contractAddress?.DAOAgendaManager,
         abi: contractAbis?.DAOAgendaManager,
+      },
+      Candidate: {
+        address: "0x",
+        abi: contractAbis.Candidate,
       }
   }
 
